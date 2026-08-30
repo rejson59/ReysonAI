@@ -1,0 +1,31 @@
+# seed_uniwersalia.tsv — reguły: każde źródło <TAB> jest celem
+ptak	zwierze
+ssak	zwierze
+ryba	zwierze
+owad	zwierze
+zwierze	organizm
+roslina	organizm
+grzyb	organizm
+drzewo	roslina
+kwiat	roslina
+owoc	roslina
+warzywo	roslina
+miasto	osiedle ludzkie
+kraj	panstwo
+stolica	miasto
+rzeka	woda
+morze	woda
+ocean	woda
+gwiazda	cialo niebieskie
+planeta	cialo niebieskie
+ksiezyc	cialo niebieskie
+kompozytor	muzyk
+poeta	pisarz
+pisarz	artysta
+malarz	artysta
+sport	aktywnosc
+gra	rozrywka
+film	rozrywka
+kontynent	czesc swiata
+potrawa	jedzenie
+zupa	potrawa

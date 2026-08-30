@@ -1,0 +1,184 @@
+# seed_fakty.tsv — wiedza startowa Reysona: podmiot <TAB> relacja <TAB> obiekt
+# Formy są znormalizowane (małe litery, bez diakrytyków); Reyson sam dopasuje odmiany.
+# --- drabina istnienia (podstawa wnioskowania) ---
+sokol	jest	ptak
+orzel	jest	ptak
+wrobel	jest	ptak
+labedz	jest	ptak
+kura	jest	ptak
+pingwin	jest	ptak
+strus	jest	ptak
+ptak	jest	zwierze
+kot	jest	zwierze
+pies	jest	zwierze
+kon	jest	zwierze
+krowa	jest	zwierze
+swinia	jest	zwierze
+wilczur	jest	pies
+owczarek	jest	pies
+lew	jest	zwierze
+tygrys	jest	zwierze
+slon	jest	zwierze
+slon	jest	ssak
+lew	jest	ssak
+tygrys	jest	ssak
+krowa	jest	ssak
+kon	jest	ssak
+wieloryb	jest	ssak
+wieloryb	zyje	w oceanie
+delfin	jest	ssak
+delfin	zyje	w oceanie
+ssak	jest	zwierze
+rekin	jest	ryba
+karp	jest	ryba
+szczupak	jest	ryba
+ryba	jest	zwierze
+zwierze	jest	organizm
+roslina	jest	organizm
+dab	jest	drzewo
+brzoza	jest	drzewo
+sosna	jest	drzewo
+drzewo	jest	roslina
+roza	jest	kwiat
+kwiat	jest	roslina
+marchew	jest	warzywo
+ziemniak	jest	warzywo
+cebula	jest	warzywo
+warzywo	jest	roslina
+jablko	jest	owoc
+banan	jest	owoc
+wisnia	jest	owoc
+malina	jest	owoc
+owoc	jest	roslina
+pieczarka	jest	grzyb
+grzyb	jest	organizm
+czlowiek	jest	ssak
+czlowiek	jest	organizm
+czlowiek	ma	serce i mozg
+# --- geografia ---
+warszawa	jest	miasto
+warszawa	jest	stolica polski
+krakow	jest	miasto
+gdansk	jest	miasto
+wroclaw	jest	miasto
+poznan	jest	miasto
+lodz	jest	miasto
+polska	jest	kraj
+polska	jest	w europie
+warszawa	lezy	w polsce
+krakow	lezy	w polsce
+wisla	jest	rzeka
+wisla	jest	najdluzsza rzeka polski
+wisla	plynie	przez warszawe i krakow
+morze baltyckie	jest	morzem
+morze baltyckie	lezy	przy polsce
+tatry	jest	gory
+tatry	leza	w polsce
+rysy	jest	najwyzszym szczytem polski
+europa	jest	kontynent
+afryka	jest	kontynent
+azja	jest	kontynent
+ameryka polnocna	jest	kontynent
+ameryka poludniowa	jest	kontynent
+australia	jest	kontynent
+antarktyda	jest	kontynent
+paryz	jest	stolica francji
+londyn	jest	stolica anglii
+berlin	jest	stolica niemiec
+rzym	jest	stolica wloch
+madryt	jest	stolica hiszpanii
+moskwa	jest	stolica rosji
+praga	jest	stolica czech
+anglia	jest	kraj
+niemcy	jest	kraj
+francja	jest	kraj
+wlochy	jest	kraj
+hiszpania	jest	kraj
+czechy	jest	kraj
+ukraina	jest	kraj
+ukraina	lezy	obok polski
+niemcy	leza	obok polski
+czechy	leza	obok polski
+# --- ludzie ---
+mikolaj kopernik	jest	astronom
+mikolaj kopernik	ustalil	ze ziemia krazy wokol slonca
+maria sklodowska-curie	jest	uczona
+maria sklodowska-curie	odkryla	rad i polon
+maria sklodowska-curie	dostala	podwojna nagrode nobla
+albert einstein	jest	fizyk
+albert einstein	stworzyl	teorie wzglednosci
+fryderyk chopin	jest	kompozytor
+fryderyk chopin	komponowal	mazurki i polonezy
+adam mickiewicz	jest	poeta
+adam mickiewicz	napisal	pan tadeusz
+juliusz slowacki	jest	poeta
+henryk sienkiewicz	jest	pisarz
+henryk sienkiewicz	napisal	quo vadis
+henryk sienkiewicz	dostal	nagrode nobla
+wisława szymborska	jest	poetka
+wisława szymborska	dostala	nagrode nobla
+jan pawel ii	jest	papiez
+jan pawel ii	pochodzil	z wadowic
+leonardo da vinci	jest	artysta
+leonardo da vinci	namalowal	mona lise
+kolumb	jest	odkrywca
+kolumb	doplynal	do ameryki w 1492 roku
+# --- nauka i świat ---
+slonce	jest	gwiazda
+slonce	jest	srodkiem ukladu slonecznego
+ziemia	jest	planeta
+ziemia	krazy	wokol slonca
+ziemia	ma	jeden ksiezyc
+ksiezyc	krazy	wokol ziemi
+mars	jest	planeta
+mars	jest	czerwona planeta
+jowisz	jest	najwieksza planeta
+uklad sloneczny	ma	osiem planet
+gwiazda	jest	kula goracego gazu
+woda	jest	potrzebna do zycia
+woda	sklada sie	z wodoru i tlenu
+woda	zamarza	przy zerze stopni
+grawitacja	powoduje	ze ciala sie przyciagaja
+swiatlo	porusza sie	najszybciej ze wszystkiego
+fotosynteza	zamienia	swiatlo w energie
+fotosynteza	wystepuje	w roslinach
+neuron	jest	komorka mozgu
+mozg	jest	srodkiem myslenia
+# --- technologia ---
+komputer	jest	maszyna liczaca
+komputer	ma	procesor i pamiec
+procesor	jest	mozgiem komputera
+pamiec ram	jest	szybka pamiec robocza
+internet	jest	siec komputerow
+internet	powstal	z sieci arpanet
+python	jest	jezyk programowania
+programista	pisze	programy
+algorytm	jest	przepisem na rozwiazanie problemu
+robot	jest	maszyna wykonujaca zadania
+sztuczna inteligencja	jest	dziedzina informatyki
+sztuczna inteligencja	buduje	systemy ktore sie ucza
+reyson	jest	system sztucznej inteligencji
+reyson	mieszka	w tym programie
+reyson	mowi	po polsku
+reyson	umie	sie uczyc
+# --- codzienność i kultura ---
+pierogi	jest	potrawa
+pierogi	jest	daniem polskim
+bigos	jest	daniem polskim
+zurek	jest	zupa
+chleb	jest	podstawowym jedzeniem
+herbata	jest	napoj
+kawa	jest	napoj
+pilka nozna	jest	sport
+plywanie	jest	sport
+szachy	jest	gra
+warcaby	jest	gra
+ksiazka	jest	zrodlo wiedzy
+biblioteka	jest	miejsce z ksiazkami
+szkola	jest	miejsce nauki
+muzyka	jest	sztuka
+malarstwo	jest	sztuka
+rzezba	jest	sztuka
+film	jest	sztuka
+teatr	jest	sztuka
+wawel	jest	zamek w krakowie

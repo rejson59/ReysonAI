@@ -1,0 +1,197 @@
+# seed_intencje.tsv — przykłady do treningu sieci intencji: tekst <TAB> intencja
+# powitanie
+czesc	powitanie
+hej	powitanie
+witaj	powitanie
+dzien dobry	powitanie
+dobry wieczor	powitanie
+dobranoc	powitanie
+siema	powitanie
+witam serdecznie	powitanie
+halo	powitanie
+elo	powitanie
+hejka	powitanie
+witaj w moim swiecie	powitanie
+dzien dobry pana	powitanie
+ok hej to zaczynajmy	powitanie
+witaj reyson	powitanie
+# pozegnanie
+do widzenia	pozegnanie
+narazie	pozegnanie
+na razie	pozegnanie
+papa	pozegnanie
+zegnaj	pozegnanie
+koniec rozmowy	pozegnanie
+pa pa pozegnanie	pozegnanie
+musze juz isc	pozegnanie
+rozmawialismy fajnie ale pale	pozegnanie
+do zobaczenia	pozegnanie
+konczymy	pozegnanie
+wychodze narazie	pozegnanie
+# jak_sie_masz
+jak sie masz	jak_sie_masz
+co u ciebie	jak_sie_masz
+jak leci	jak_sie_masz
+jak tam twoje samopoczucie	jak_sie_masz
+co porabiasz	jak_sie_masz
+jak sie czujesz	jak_sie_masz
+co robisz teraz	jak_sie_masz
+wszystko okej	jak_sie_masz
+jak mija ci dzien	jak_sie_masz
+co slychac	jak_sie_masz
+# tozsamosc
+kim jestes	tozsamosc
+kto ty jestes	tozsamosc
+jak sie nazywasz	tozsamosc
+przedstaw sie	tozsamosc
+co to za program	tozsamosc
+co ty jestes tozsamosc	tozsamosc
+jestes czlowiekiem	tozsamosc
+czy jestes botem	tozsamosc
+jak masz na imie	tozsamosc
+mowisz o sobie reyson co to	tozsamosc
+powiedz kim jestes	tozsamosc
+jak ci sie nazywa	tozsamosc
+# mozliwosci
+co umiesz	mozliwosci
+co potrafisz	mozliwosci
+jakie masz mozliwosci	mozliwosci
+do czego sluzysz	mozliwosci
+co mozesz zrobic	mozliwosci
+pokaż co potrafisz	mozliwosci
+umiesz liczyc	mozliwosci
+umiesz mowic po polsku	mozliwosci
+czym sie zajmujesz na co dzien	mozliwosci
+jakie masz umiejetnosci	mozliwosci
+co potrafisz zrobic dla mnie	mozliwosci
+# podziekowanie
+dziekuje	podziekowanie
+dzieki	podziekowanie
+dzieki bardzo	podziekowanie
+wielkie dzieki	podziekowanie
+super robisz to dziekuje	podziekowanie
+jestem ci wdzieczny	podziekowanie
+thx	podziekowanie
+dziekuje bardzo za pomoc	podziekowanie
+# pytanie_fakt
+co to jest sztuczna inteligencja	pytanie_fakt
+kto to byl kopernik	pytanie_fakt
+co to jest fotosynteza	pytanie_fakt
+co wiesz o polsce	pytanie_fakt
+opowiedz o krakowie	pytanie_fakt
+kto to jest chopin	pytanie_fakt
+co to jest neuron	pytanie_fakt
+powiedz mi cos o wisle	pytanie_fakt
+czy sokol jest zwierzeciem	pytanie_fakt
+czy ptak jest zwierzeciem	pytanie_fakt
+co wiesz o warszawie	pytanie_fakt
+kto napisal pan tadeusz	pytanie_fakt
+co to morze baltyckie	pytanie_fakt
+czym jest internet	pytanie_fakt
+co wiesz o ziemi	pytanie_fakt
+# uczenie
+zapamietaj ze wisla to rzeka	uczenie
+zapamietaj, ze lubie pierogi	uczenie
+pamietaj ze marek lubi herbate	uczenie
+naucz sie ze paryz jest we francji	uczenie
+wiedz ze mam psa	uczenie
+zapamietaj, ze praca to obowiazek	uczenie
+zapamietaj ze lubie czytac ksiazki	uczenie
+naucz sie: wawel to zamek	uczenie
+zapisz to lubie spac	uczenie
+zapamiętaj że córka ma na imię ola	uczenie
+# uniwersalne
+kazdy ptak jest zwierzeciem	uniwersalne
+kazdy pies jest zwierzeciem	uniwersalne
+kazde dziecko jest czlowiekiem	uniwersalne
+wszystkie ryby zyja w wodzie	uniwersalne
+kazdy pisarz czyta ksiazki	uniwersalne
+kazdy artysta tworzy dziela	uniwersalne
+kazde miasto ma ulice	uniwersalne
+kazda zupa jest potrawa	uniwersalne
+# arytmetyka
+ile to 2 plus 2	arytmetyka
+ile jest 12 razy 12	arytmetyka
+oblicz 100 minus 45	arytmetyka
+ile to 7 * 8	arytmetyka
+policz 34 plus 66	arytmetyka
+ile to 15% z 200	arytmetyka
+pierwiastek z 144	arytmetyka
+ile jest dziewiec razy trzy	arytmetyka
+oblicz 81 podzielic przez 9	arytmetyka
+ile to dwa plus trzy	arytmetyka
+policz mi 50 plus 50	arytmetyka
+ile to 1024 minus 24	arytmetyka
+# czas_data
+ktora godzina	czas_data
+jaka jest godzina	czas_data
+jaki dzien dzisiaj	czas_data
+jaka jest dzisiejsza data	czas_data
+ktory dzis dzien tygodnia	czas_data
+powiedz mi ktora godzina	czas_data
+co to za dzien	czas_data
+# opowiadanie
+opowiedz cos	opowiadanie
+opowiedz mi historie	opowiadanie
+wymysl bajke	opowiadanie
+opowiedz o czyms ciekawym	opowiadanie
+powiedz cos madrego	opowiadanie
+masz jakas historie	opowiadanie
+opowiedz co sie stalo w Twoich snach	opowiadanie
+# opinia
+co myslisz o sztucznej inteligencji	opinia
+jak uwazasz czy ludzie sa dobrzy	opinia
+twoja opinia o muzyce	opinia
+co sadzisz o ksiazkach	opinia
+lubisz matematyke	opinia
+jak myslisz czy warto sie uczyc	opinia
+co uwazasz o pogodzie	opinia
+# pytanie_o_mnie
+ile wiesz	pytanie_o_mnie
+ile juz sie nauczyles	pytanie_o_mnie
+jak szybko sie uczysz	pytanie_o_mnie
+jaki jest twoj poziom	pytanie_o_mnie
+jak sie rozwijasz	pytanie_o_mnie
+co ostatnio nauczyles sie nowego	pytanie_o_mnie
+ile masz faktow w pamieci	pytanie_o_mnie
+czym sie dzis nauczyles	pytanie_o_mnie
+# pomoc
+pomoc	pomoc
+help	pomoc
+co mam robic	pomoc
+jak z tego korzystac	pomoc
+pokaz komendy	pomoc
+jak cie uzyc	pomoc
+instrukcja obslugi	pomoc
+# imie_uzytkownika
+nazywam sie marek	imie_uzytkownika
+mam na imie anna	imie_uzytkownika
+jestem piotr	imie_uzytkownika
+jak mam na imie	imie_uzytkownika
+pamietasz jak sie nazywam	imie_uzytkownika
+jak ja sie nazywam	imie_uzytkownika
+jestem kasia	imie_uzytkownika
+nazywam się adam	imie_uzytkownika
+# sprzatanie
+wyczysc pamiec	sprzatanie
+zapomnij wszystko	sprzatanie
+usun fakty	sprzatanie
+wyczyść sie	sprzatanie
+# ocena_dobra
+dobra odpowiedz	ocena_dobra
+swietnie	ocena_dobra
+super	ocena_dobra
+brawo	ocena_dobra
+madry jestes	ocena_dobra
+dobrze Panie	ocena_dobra
+ladnie powiedziane	ocena_dobra
+ekstra	ocena_dobra
+# ocena_zla
+zla odpowiedz	ocena_zla
+blednie	ocena_zla
+nie rozumiesz	ocena_zla
+nie tak	ocena_zla
+to nieprawda	ocena_zla
+bledna odpowiedz	ocena_zla
+nie o to chodzilo	ocena_zla
+zle liczysz	ocena_zla
