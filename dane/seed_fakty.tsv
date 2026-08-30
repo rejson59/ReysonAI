@@ -182,3 +182,15 @@ rzezba	jest	sztuka
 film	jest	sztuka
 teatr	jest	sztuka
 wawel	jest	zamek w krakowie
+# --- programowanie (RM-2) ---
+python	to	jezyk programowania
+javascript	to	jezyk programowania
+jezyk programowania	to	jezyk formalny
+algorytm	to	przepis na rozwiazanie problemu
+program	to	ciag instrukcji
+zmienna	to	pojemnik na dane
+funkcja	to	nazwany blok kodu
+petla	to	instrukcja powtarzajaca kod
+lista	uporzadkowany	zbior elementow
+slownik	zbior(par)	klucz wartosc
+komentarz	to	tekst pomijany przez interpreter

@@ -65,6 +65,13 @@ CREATE TABLE IF NOT EXISTS intencje (
     intencja TEXT NOT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_intencje_unikalne ON intencje(tekst, intencja);
+CREATE TABLE IF NOT EXISTS przepisy (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    temat TEXT NOT NULL,
+    jezyk TEXT DEFAULT 'python',
+    kod TEXT NOT NULL,
+    ts INTEGER
+);
 CREATE TABLE IF NOT EXISTS dialogi (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     sesja TEXT,
@@ -94,6 +101,8 @@ class Pamiec:
     def __init__(self, sciezka: str = "dane/umysl.db"):
         self._mapa_pisowni: Optional[dict] = None
         self.sciezka = sciezka
+        #: maksymalny rząd n-gramów (ustawia profil; 3 = lekko, 4 = tryb turbo)
+        self.maks_n_gramu = 3
         katalog = os.path.dirname(sciezka)
         if katalog:
             os.makedirs(katalog, exist_ok=True)
@@ -122,6 +131,18 @@ class Pamiec:
             (klucz, str(wartosc)),
         )
         self.db.commit()
+
+    def meta_pobierz_int(self, klucz: str, domyslne: int = 0) -> int:
+        w = self.meta_pobierz(klucz)
+        try:
+            return int(w) if w is not None else domyslne
+        except (TypeError, ValueError):
+            return domyslne
+
+    def meta_zwieksz(self, klucz: str, o_ile: int = 1) -> int:
+        nowa = self.meta_pobierz_int(klucz) + o_ile
+        self.meta_ustaw(klucz, str(nowa))
+        return nowa
 
     def zapisz_dziennik(self, typ: str, tresc: str) -> None:
         self.db.execute(
@@ -273,6 +294,15 @@ class Pamiec:
             "SELECT zrodlo_klasy,cel_klasy FROM uniwersalia"
         ).fetchall()
 
+    def wzmacniaj_fakt(self, podmiot: str, relacja: str, obiekt: str) -> None:
+        """Potwierdzenie faktu (np. przez radę agentów) podnosi jego ufność."""
+        self.db.execute(
+            "UPDATE fakty SET ufnosc=MIN(0.99, ufnosc+0.03) "
+            "WHERE podmiot=? AND relacja=? AND obiekt=?",
+            (nlp.normalizuj(podmiot), nlp.normalizuj(relacja), nlp.normalizuj(obiekt)),
+        )
+        self.db.commit()
+
     # -- wiedza tekstowa ------------------------------------------------------
 
     def dodaj_wiedze(self, tytul: str, zdania_wiedzy: Iterable[str], zrodlo: str) -> int:
@@ -344,26 +374,22 @@ class Pamiec:
 
     # -- n-gramy (model generatywny) ------------------------------------------
 
-    def ucz_ngramy(self, tokens: Sequence[str], maks_n: int = 3) -> int:
-        """Liczy n-gramy (2 i 3) z sekwencji tokenów. Zwraca liczbę zapisów.
+    def ucz_ngramy(self, tokens: Sequence[str], maks_n: Optional[int] = None) -> int:
+        """Liczy n-gramy (2..maks_n) z sekwencji tokenów. Zwraca liczbę zapisów.
 
-        Początki zdań mają wspólne konteksty „<s> <s>” i „<s> {pierwsze_słowo}”,
-        dzięki czemu generator umie zacząć nowe zdanie, a sen ich nie wypruje.
+        Konteksty są dopełniane znacznikami „<s>”, dzięki czemu każdy rząd
+        modelu zna rozpoczęcia zdań („<s> <s>”, „<s> <s> <s>”, …), a generator
+        umie zaczynać nowe zdania i płynnie się cofać (backoff 4→3→2).
         """
+        maks_n = maks_n or self.maks_n_gramu
         zapisy = 0
-        for n in (2, 3):
-            if len(tokens) < n:
+        for n in range(2, maks_n + 1):
+            pad = ["<s>"] * (n - 1) + [t for t in tokens if t != "<s>"]
+            if len(pad) < n:
                 continue
-            for i in range(len(tokens) - n + 1):
-                if n == 2:
-                    kontekst, cel = tokens[i], tokens[i + 1]
-                elif i == 0:
-                    kontekst, cel = "<s> <s>", tokens[0]
-                elif i == 1:
-                    kontekst, cel = f"<s> {tokens[0]}", tokens[1]
-                else:
-                    kontekst = " ".join(tokens[i:i + 2])
-                    cel = tokens[i + 2]
+            for i in range(len(pad) - n + 1):
+                kontekst = " ".join(pad[i:i + n - 1])
+                cel = pad[i + n - 1]
                 self.db.execute(
                     "INSERT INTO ngramy(n,kontekst,slowo,licznik) VALUES(?,?,?,1) "
                     "ON CONFLICT(n,kontekst,slowo) DO UPDATE SET licznik=licznik+1",
@@ -374,21 +400,19 @@ class Pamiec:
         return zapisy
 
     def nastepne_slowa(self, kontekst: Sequence[str], n: int = 3, limit: int = 8) -> List[Tuple[str, int]]:
-        """Kandydaci na następne słowo dla kontekstu (z backoffem)."""
-        if len(kontekst) >= 2:
-            k = " ".join(kontekst[-2:])
-        else:
-            k = ("<s> <s>" if not kontekst else kontekst[-1])
-        rows = self.db.execute(
-            "SELECT slowo,licznik FROM ngramy WHERE n=? AND kontekst=? ORDER BY licznik DESC LIMIT ?",
-            (n, k, limit),
-        ).fetchall()
-        if not rows and n == 3:
+        """Kandydaci na następne słowo dla kontekstu (backoff aż do bigramu)."""
+        while n >= 2:
+            okno = list(kontekst[-(n - 1):]) if n > 1 else []
+            pad = ["<s>"] * (n - 1 - len(okno)) + okno
+            k = " ".join(pad)
             rows = self.db.execute(
-                "SELECT slowo,licznik FROM ngramy WHERE n=2 AND kontekst=? ORDER BY licznik DESC LIMIT ?",
-                (kontekst[-1] if kontekst else "<s>", limit),
+                "SELECT slowo,licznik FROM ngramy WHERE n=? AND kontekst=? ORDER BY licznik DESC LIMIT ?",
+                (n, k, limit),
             ).fetchall()
-        return rows
+            if rows:
+                return rows
+            n -= 1
+        return []
 
     def liczba_ngramow(self) -> int:
         return self.db.execute("SELECT COUNT(*) FROM ngramy").fetchone()[0]
@@ -414,6 +438,35 @@ class Pamiec:
         return self.db.execute("SELECT COUNT(*) FROM intencje").fetchone()[0]
 
     # -- dialogi i oceny ---------------------------------------------------------
+
+    # -- przepisy kodu (umiejętność programowania) ------------------------------
+
+    def dodaj_przepis(self, temat: str, kod: str, jezyk: str = "python") -> bool:
+        temat_n = nlp.normalizuj(temat).strip()
+        kod = kod.strip()
+        if not temat_n or not kod:
+            return False
+        ist = self.db.execute(
+            "SELECT 1 FROM przepisy WHERE temat=? AND kod=?", (temat_n, kod)
+        ).fetchone()
+        if ist:
+            return False
+        self.db.execute(
+            "INSERT INTO przepisy(temat,jezyk,kod,ts) VALUES(?,?,?,?)",
+            (temat_n, jezyk, kod, self.teraz()),
+        )
+        self.db.commit()
+        return True
+
+    def przepisy(self, limit: int = 50) -> List[Tuple[str, str, str]]:
+        return self.db.execute(
+            "SELECT temat,jezyk,kod FROM przepisy ORDER BY id DESC LIMIT ?", (limit,)
+        ).fetchall()
+
+    def liczba_przepisow(self) -> int:
+        return self.db.execute("SELECT COUNT(*) FROM przepisy").fetchone()[0]
+
+    # -- dialogi i oceny ----------------------------------------------------------
 
     def zapisz_dialog(self, sesja: str, rola: str, tresc: str, intencja: str = "") -> None:
         self.db.execute(

@@ -6,15 +6,17 @@ ReysonAI — lekki, samorozwijający się system AI mówiący po polsku.
 Użycie:
     python reyson.py                     # rozmowa (tryb interaktywny)
     python reyson.py --buduj             # (re)budowa umysłu z korpusu startowego
-    python reyson.py --naucz-sie TEMAT   # nauka z polskiej Wikipedii
+    python reyson.py --naucz-sie TEMAT   # nauka tematu (Wikipedia online / lekcje offline)
     python reyson.py --samorozwoj [N]    # N cykli samodzielnego rozwoju (domyślnie 1)
+    python reyson.py --rada TEMAT        # rada agentów dyskutuje o temacie
     python reyson.py --sen               # konsolidacja pamięci („sen”)
-    python reyson.py --statystyki        # stan umysłu
+    python reyson.py --statystyki        # stan umysłu (z trybem urządzenia)
     python reyson.py --dziennik [N]      # ostatnie wpisy z dziennika rozwoju
     python reyson.py --web [PORT]        # interfejs www (domyślnie port 8000)
     python reyson.py --test              # testy wewnętrzne
 
 Wymagania: Python 3.8+, tylko biblioteka standardowa. RAM: < 100 MB.
+Tryb pracy dopasowuje się automatycznie do urządzenia (REYSON_TRYB=mini|standard|turbo).
 """
 
 from __future__ import annotations
@@ -53,6 +55,10 @@ def cmd_samorozwoj(m: Mozg, args) -> None:
     mtr = m.uczony.metryki()
     print(f"Poziom rozwoju po cyklach: {mtr['poziom']}/100 "
           f"(fakty: {mtr['fakty']}, słownik: {mtr['slownik']})")
+
+
+def cmd_rada(m: Mozg, args) -> None:
+    print(m.daj_rade().dyskutuj(args.rada, log=lambda s: print(f"  · {s}")))
 
 
 def cmd_sen(m: Mozg, args) -> None:
@@ -99,6 +105,8 @@ def main() -> int:
     ap.add_argument("--naucz-sie", metavar="TEMAT", dest="temat", help="nauka tematu z Wikipedii")
     ap.add_argument("--samorozwoj", nargs="?", type=int, const=1, metavar="N",
                     help="N cykli autonomicznego rozwoju")
+    ap.add_argument("--rada", metavar="TEMAT",
+                    help="rada agentów dyskutuje o temacie")
     ap.add_argument("--sen", action="store_true", help="konsolidacja pamięci")
     ap.add_argument("--statystyki", action="store_true", help="stan umysłu")
     ap.add_argument("--dziennik", nargs="?", type=int, const=20, metavar="N",
@@ -131,6 +139,8 @@ def main() -> int:
     try:
         if args.temat:
             cmd_naucz(m, args)
+        elif args.rada:
+            cmd_rada(m, args)
         elif args.samorozwoj is not None:
             cmd_samorozwoj(m, args)
         elif args.sen:

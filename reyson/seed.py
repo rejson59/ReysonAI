@@ -45,7 +45,8 @@ def _czytaj_tsv(nazwa: str, min_kol: int) -> List[List[str]]:
     return wiersze
 
 
-def wczytaj_korpus_startowy(pamiec: Pamiec, log: Optional[Callable[[str], None]] = None) -> None:
+def wczytaj_korpus_startowy(pamiec: Pamiec, log: Optional[Callable[[str], None]] = None,
+                            rozum=None) -> None:
     def say(m: str) -> None:
         if log:
             log("  " + m)
@@ -97,3 +98,33 @@ def wczytaj_korpus_startowy(pamiec: Pamiec, log: Optional[Callable[[str], None]]
                 pamiec.zarejestruj_slowa(tokeny)
                 n_gramow += pamiec.ucz_ngramy(tokeny + ["."])
     say(f"n-gramy z korpusu: {n_gramow}")
+
+    # 6) lokalne lekcje (m.in. programowanie) — wiedza dostępna od urodzenia
+    katalog_lekcji = os.path.join(KATALOG, "lekcje")
+    n_lekcji = 0
+    if os.path.isdir(katalog_lekcji):
+        if rozum is None:
+            from .rozum import Rozum as _Rozum
+            rozum = _Rozum(pamiec)
+        import re as _re
+        for plik in sorted(os.listdir(katalog_lekcji)):
+            if not plik.endswith(".txt") or plik.startswith("."):
+                continue
+            try:
+                with open(os.path.join(katalog_lekcji, plik), encoding="utf-8") as f:
+                    tekst_l = f.read()
+            except OSError:
+                continue
+            m = _re.search(r"^#\s*(.+)$", tekst_l, _re.MULTILINE)
+            tytul = m.group(1).strip() if m else plik[:-4].replace("_", " ")
+            zdania_l = [z for z in nlp.zdania(tekst_l) if not z.startswith("#")]
+            for z in zdania_l:
+                pamiec.zarejestruj_slowa(nlp.tokenizuj_wyswietl(z))
+                pamiec.ucz_ngramy(nlp.tokenizuj_wyswietl(z) + ["."])
+                rozum.ucz_sie_z_zdania(z)  # definicje „X to Y” → fakty od urodzenia
+            pamiec.dodaj_wiedze(tytul.lower(), zdania_l, zrodlo="lekcja")
+            pamiec.meta_ustaw("lekcja:" + plik, "1")
+            n_lekcji += 1
+        if n_lekcji:
+            pamiec.meta_ustaw("lekcje_przeczytane", str(n_lekcji))
+    say(f"lokalne lekcje: {n_lekcji}")

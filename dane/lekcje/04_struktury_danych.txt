@@ -1,0 +1,3 @@
+# Struktury danych
+
+Lista to uporządkowany zbiór elementów. Indeks to numer pozycji elementu w sekwencji. Indeksowanie zaczyna się od zera. Wycinek to fragment listy albo napisu. Krotka to lista, której nie można zmieniać. Słownik to zbiór par klucza i wartości. Klucz identyfikuje wartość w słowniku. Zbiór to kolekcja unikalnych elementów bez kolejności. Dodawanie elementu do listy wykonuje metoda append. Sortowanie porządkuje elementy rosnąco. Wyszukiwanie znajduje pozycję elementu. Napis to sekwencja znaków. Łączenie napisów to konkatenacja. Formatowanie napisów wstawia wartości do szablonu. Pusta lista to lista bez elementów. Długość kolekcji zwraca funkcja len.

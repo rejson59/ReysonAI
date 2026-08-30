@@ -1,0 +1,3 @@
+# Funkcje w Pythonie
+
+Funkcja to nazwany blok kodu wykonujący konkretne zadanie. Funkcję definiuje słowem def. Argument to wartość przekazana do funkcji. Wartość zwracana to wynik funkcji. Instrukcja return kończy funkcję i zwraca wynik. Parametr to nazwa argumentu w definicji funkcji. Wywołanie funkcji uruchamia jej kod. Zmienna lokalna istnieje tylko wewnątrz funkcji. Rekurencja to wywoływanie funkcji przez samą siebie. Warunek bazowy kończy rekurencję. Silnia to klasyczny przykład rekurencji. Funkcja czysta nie zmienia stanu poza sobą. Domyślny argument używa wartości, gdy nie podano innej. Dokumentacja funkcji opisuje jej działanie. Napisy dokumentacyjne zapisuje w potrójnych cudzysłowach.

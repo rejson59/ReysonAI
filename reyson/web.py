@@ -73,7 +73,7 @@ _STRONA = """<!doctype html>
 <body>
 <header>
   <h1>🧠 ReysonAI</h1>
-  <span class="model">model RM-1 · czysty Python · działa na 4 GB RAM</span>
+  <span class="model">model RM-2 · sieć agentów · czysty Python</span>
   <span id="stan">ładowanie…</span>
 </header>
 <main id="log"></main>
@@ -82,14 +82,19 @@ _STRONA = """<!doctype html>
     <input id="wejscie" placeholder="Napisz po polsku… (np. co to jest Wisła?)"
            autocomplete="off" autofocus>
     <button class="glowne" onclick="wyslij()">Wyślij</button>
-    <button onclick="polecenie('/api/samorozwoj')" title="Autonomiczny cykl nauki">samorozwoj</button>
+    <button onclick="radaDialog()" title="Sieć agentów dyskutuje i uczy się">🏛️ rada</button>
+    <button onclick="polecenie('/api/samorozwoj')" title="Autonomiczny cykl nauki (też offline)">samorozwoj</button>
     <button onclick="polecenie('/api/sen')" title="Konsolidacja pamięci">sen</button>
     <button onclick="polecenie('/api/dziennik')" title="Dziennik rozwoju">dziennik</button>
   </div>
   <div class="podpowiedzi">
     <button onclick="wstaw('co to jest fotosynteza?')">co to jest fotosynteza?</button>
     <button onclick="wstaw('czy sokół jest zwierzęciem?')">czy sokół jest zwierzęciem?</button>
+    <button onclick="wstaw('co jest ssakiem?')">co jest ssakiem?</button>
     <button onclick="wstaw('ile to 12 * (3 + 4)?')">ile to 12 * (3 + 4)?</button>
+    <button onclick="wstaw('napisz funkcję silnia')">napisz funkcję silnia</button>
+    <button onclick="wstaw('oblicz w pythonie [x*2 for x in range(5)]')">oblicz w pythonie…</button>
+    <button onclick="wstaw('rada: czy maszyny myślą?')">rada: czy maszyny myślą?</button>
     <button onclick="wstaw('zapamiętaj, że lubię pierogi')">zapamiętaj, że lubię pierogi</button>
     <button onclick="wstaw('naucz się Wawel')">naucz się Wawel</button>
     <button onclick="wstaw('opowiedz historię')">opowiedz historię</button>
@@ -113,7 +118,7 @@ async function odswiezStan() {
     const r = await fetch('/api/stan');
     const s = await r.json();
     document.getElementById('stan').innerHTML =
-      `poziom <b>${s.poziom}/100</b> · fakty <b>${s.fakty}</b> · słownik <b>${s.slownik}</b> · n-gramy <b>${s.ngramy}</b>`;
+      `tryb <b>${s.tryb}</b> · poziom <b>${s.poziom}/100</b> · fakty <b>${s.fakty}</b> · słownik <b>${s.slownik}</b> · rady <b>${s.rady}</b>`;
   } catch (e) {}
 }
 
@@ -154,11 +159,18 @@ function wyslij() {
 
 function polecenie(sciezka) {
   const etykiety = {
-    '/api/samorozwoj': 'Reyson sam się rozwija (pobiera wiedzę, wnioskuje)…',
+    '/api/samorozwoj': 'Reyson sam się rozwija (uczy się, sprawdza, wnioskuje)…',
     '/api/sen': 'Reyson zasypia — konsoliduje pamięć…',
     '/api/dziennik': 'Czytam dziennik rozwoju…'
   };
   wykonaj(sciezka, null, etykiety[sciezka] || 'Pracuję…');
+}
+
+function radaDialog() {
+  const temat = prompt('Na jaki temat zwołać radę agentów?', 'czy maszyny myślą?');
+  if (!temat) return;
+  dodaj('uzytkownik', 'rada: ' + temat);
+  wykonaj('/api/rada', {temat}, '🏛️ Rada agentów dyskutuje…');
 }
 
 function wstaw(t) { wejscie.value = t; wejscie.focus(); }
@@ -166,8 +178,9 @@ function wstaw(t) { wejscie.value = t; wejscie.focus(); }
 wejscie.addEventListener('keydown', e => { if (e.key === 'Enter') wyslij(); });
 
 dodaj('reyson system',
-  'Cześć! Jestem Reyson — mówię po polsku, wnioskuję, liczę i uczę się od Ciebie. ' +
-  'Zapytaj o coś, naucz mnie czegoś albo naciśnij „samorozwoj”, a poczytam sobie sam.');
+  'Cześć! Jestem Reyson RM-2 — mówię po polsku, wnioskuję, liczę, programuję i uczę się od Ciebie. ' +
+  'Zapytaj o coś, kaz mi pisać kod, zwołaj radę agentów albo naciśnij „samorozwoj”, a rozwinię się sam ' +
+  '(działa też offline). Automatycznie dopasowałem się do Twojego urządzenia.');
 odswiezStan();
 </script>
 </body>
@@ -240,6 +253,9 @@ def _zrob_handler(mozg: Mozg):
                 self._odp_bezpiecznie(lambda: mozg.uczony.sen())
             elif sciezka == "/api/samorozwoj":
                 self._odp_bezpiecznie(lambda: mozg.uczony.cykl_samorozwoju())
+            elif sciezka == "/api/rada":
+                temat = str(dane.get("temat", "")).strip()[:120]
+                self._odp_bezpiecznie(lambda: mozg.daj_rade().dyskutuj(temat))
             else:
                 self.send_response(404)
                 self.end_headers()
