@@ -1,0 +1,65 @@
+# seed_wiedza.tsv — wiedza encyklopedyczna: tytuł <TAB> zdanie
+# To jest pamięć asocjacyjna Reysona — z niej odpowiada na "co wiesz o ...".
+polska	Polska to kraj w Europie Środkowej, nad Morzem Bałtyckim.
+polska	Stolicą Polski jest Warszawa, a największe miasta to Kraków, Łódź, Wrocław i Poznań.
+polska	Po polsku mówi ponad czterdzieści milionów ludzi na świecie.
+polska	Najdłuższą rzeką Polski jest Wisła, a najwyższym szczytem Rysy w Tatrach.
+polska	Polska słynie z pierogów, bigosu, żurku i sukcesów piłki ręcznej.
+warszawa	Warszawa to stolica Polski i największe miasto kraju.
+warszawa	W Warszawie płynie Wisła, a symbolem miasta jest Syrenka.
+warszawa	Stare Miasto w Warszawie odbudowano po wojnie i wpisano na listę UNESCO.
+krakow	Kraków to dawna stolica Polski, położona nad Wisłą.
+krakow	Na Wawelu w Krakowie koronowano królów Polski.
+krakow	W Krakowie znajduje się jeden z najstarszych uniwersytetów Europy — Akademia Krakowska.
+kopernik	Mikołaj Kopernik był polskim astronomem renesansu.
+kopernik	Kopernik ustalił, że Ziemia krąży wokół Słońca — to teoria heliocentryczna.
+kopernik	Wielkie dzieło Kopernika to „O obrotach sfer niebieskich”.
+maria curie	Maria Skłodowska-Curie była polską uczoną, pionierką badań nad promieniotwórczością.
+maria curie	Maria Curie odkryła pierwiastki: rad i polon.
+maria curie	Maria Curie jako pierwsza dostała podwójną Nagrodę Nobla — z fizyki i z chemii.
+chopin	Fryderyk Chopin był polskim kompozytorem i pianistą.
+chopin	Chopin komponował mazurki, polonezy, etiudy i ballady.
+chopin	Muzyka Chopina uważana jest za narodowy skarb Polski.
+mickiewicz	Adam Mickiewicz to największy polski poeta romantyczny.
+mickiewicz	Mickiewicz napisał „Pana Tadeusza”, „Dziady” i „Konrada Wallenroda”.
+pan tadeusz	Pan Tadeusz to epopeja Adama Mickiewicza o polskiej szlachcie.
+pan tadeusz	Pan Tadeusz zaczyna się od słów „Litwo, ojczyzno moja”.
+sztuczna inteligencja	Sztuczna inteligencja to dziedzina informatyki, która buduje systemy uczące się i rozumujące.
+sztuczna inteligencja	Model językowy przewiduje kolejne słowa, ucząc się na przykładach tekstu.
+sztuczna inteligencja	Małe modele AI mogą działać nawet na słabych komputerach, o ile są dobrze zaprojektowane.
+sztuczna inteligencja	Samorozwój systemu AI to zbieranie informacji, uczenie się z nich i poprawianie własnych odpowiedzi.
+uczenie sie	System AI uczy się przez dodawanie przykładów, wzmacnianie dobrych odpowiedzi i konsolidację pamięci.
+neuron	Neuron to komórka nerwowa, która przekazuje impulsy elektryczne.
+neuron	Sieć neuronowa składa się z tysięcy prostych neuronów liczbowych.
+mozg	Mózg człowieka ma około osiemdziesięciu sześć miliardów neuronów.
+mozg	Sen pomaga mózgowi utrwalać pamięć — dlatego Reyson też „śpi”.
+sen	Sen to stan odpoczynku, w którym mózg porządkuje zdobytą wiedzę.
+wisla	Wisła to najdłuższa rzeka Polski, płynie od Baraniej Góry do Bałtyku.
+wisla	Wisla przepływa przez Kraków, Warszawę i Gdańsk.
+tatry	Tatry to najwyższe góry Polski i Słowacji, część Karpat.
+tatry	W Tatrach leży Rysy, najwyższy szczyt Polski.
+morze baltyckie	Morze Bałtyckie to morze wewnętrzne w Europie Północnej.
+morze baltyckie	Polska ma pięciuset kilometrów wybrzeża Bałtyku.
+wawel	Wawel to wzgórze i zamek królewski w Krakowie nad Wisłą.
+wawel	Na Wawelu mieści się katedra, w której koronowano królów Polski.
+pierogi	Pierogi to danie z ciasta nadziewanego np. ruskiem, mięsem lub owocami.
+pierogi	Pierogi to jedna z najbardziej znanych polskich potraw.
+ziemia	Ziemia to trzecia planeta od Słońca i jedyna znana planeta z życiem.
+ziemia	Ponad siedemdziesiąt procent powierzchni Ziemi pokrywają oceany.
+slonce	Słońce to gwiazda, wokół której krąży Ziemia i inne planety.
+slonce	Słońce daje Ziemi światło i ciepło potrzebne do życia.
+ksiezyc	Księżyc to naturalny satelita Ziemi.
+ksiezyc	Księżyc powoduje pływy oceanów.
+fotosynteza	Fotosynteza to proces, w którym rośliny zamieniają światło w energię.
+fotosynteza	Podczas fotosyntezy rośliny pobierają dwutlenek węgla, a oddają tlen.
+internet	Internet to globalna sieć łącząca miliardy komputerów.
+internet	W Polsce internet dotarł na masową skalę w latach dziewięćdziesiątych.
+python	Python to język programowania znany z prostej, czytelnej składni.
+python	Reyson został napisany właśnie w Pythonie.
+komputer	Komputer to maszyna, która przetwarza informacje według programów.
+komputer	Do działania programów potrzebna jest pamięć RAM i procesor.
+jezyk polski	Język polski zachował siedem przypadków gramatycznych.
+jezyk polski	Polska literatura dała światu Mickiewicza, Słowackiego, Sienkiewicza i Szymborską.
+reyson	Reyson to lekki, samorozwijający się system AI mówiący po polsku.
+reyson	Reyson uczy się z rozmów, z Wikipedii i z własnych „snów”.
+reyson	Model Reysona to RM-1: sieć neuronowa plus pamięć asocjacyjna plus rozum symboliczny.

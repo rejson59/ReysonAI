@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+dane/umysl.db
+dane/umysl.db-*
+dane/rm1_wagi.json
+.pytest_cache/
