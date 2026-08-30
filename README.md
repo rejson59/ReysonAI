@@ -34,18 +34,38 @@ Wszystko siedzi w **jednym pliku SQLite** (`dane/umysl.db`) + pliku wag sieci
 (`dane/rm1_wagi.json`). Żadnych GPU, żadnych chmur, żadnych kluczy API.
 Wikipedia (jeśli jest internet) pobierana jest publicznym REST API.
 
-## Szybki start
+## Instalacja i szybki start — jedna komenda
+
+Reyson nie wymaga `pip install`, żadnych pakietów ani kont w chmurze.
+Wystarczy **Python 3.8+** (sprawdzisz: `python3 --version`).
+
+**Linux / macOS / Windows (z gitem) — klonuj i rozmawiaj:**
 
 ```bash
-# wymagany Python 3.8+; żadnych pip install!
-python3 reyson.py                # pierwsze uruchomienie buduje umysł (~10 s)
+git clone https://github.com/rejson59/ReysonAI.git && cd ReysonAI && python3 reyson.py
 ```
 
-Interfejs www (czat w przeglądarce + przyciski rozwoju):
+**Bez gita — pobierz archiwum i odpal (Linux/macOS):**
+
+```bash
+curl -L https://github.com/rejson59/ReysonAI/archive/refs/heads/main.tar.gz | tar xz && cd ReysonAI-main && python3 reyson.py
+```
+
+**Windows (PowerShell):**
+
+```powershell
+git clone https://github.com/rejson59/ReysonAI.git; cd ReysonAI; python reyson.py
+```
+
+Pierwsze uruchomienie samo zbuduje umysł (~8 s) i od razu otworzy rozmowę po polsku.
+Wolisz czat w przeglądarce niż terminal? Dopisz `--web`:
 
 ```bash
 python3 reyson.py --web 8080     # → http://localhost:8080
 ```
+
+Po instalacji napisz do Reysona `pomoc` albo zajrzyj do sekcji
+[„Czym Reyson może Cię zaskoczyć”](#czym-reyson-może-cię-zaskoczyć).
 
 ## Czym Reyson może Cię zaskoczyć
 
