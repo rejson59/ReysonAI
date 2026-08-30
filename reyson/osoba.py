@@ -52,26 +52,36 @@ MOZLIWOSCI = """Oto, co umiem już dziś:
 • rozmawiać po polsku i odpowiadać na pytania o świat, który poznaję,
 • wnioskować: „czy sokół jest zwierzęciem?” — sprawdzę całą drabinę pokrewieństwa,
 • liczyć: „ile to 12 * (3 + 4)?”, „15% z 200”, „pierwiastek z 144”,
-• mówić godzinę i datę, zapamiętywać Twoje imię,
+• PROGRAMOWAĆ: „napisz funkcję silnia”, „oblicz w pythonie [x*2 for x in range(5)]”,
+  „co robi ten kod: print('cześć')”, „co to jest zmienna”,
+• zwoływać RADĘ AGENTÓW, która sama dyskutuje i uczy się ze sobą: „rada: czy AI myśli?”,
+• mówić godzinę i datę, zapamiętywać Twoje imię i preferencje,
 • uczyć się z rozmowy: „zapamiętaj, że delfin to ssak”,
-• czytać polską Wikipedię: „naucz się fotosyntezy”,
-• opowiadać własne historie (mój model generatywny), 
-• rozwijać się sam: tryb „samorozwój” i „sen” (konsolidacja pamięci).
+• czytać polską Wikipedię (online) i WŁASNE LEKCJE (offline): „naucz się fotosyntezy”,
+• opowiadać własne historie (mój model generatywny),
+• rozwijać się sam: tryb „samorozwój” (działa też bez internetu) i „sen”,
+• dostrajać się do Twojego urządzenia (tryb mini / standard / turbo).
 Wpisz „pomoc”, aby zobaczyć przykłady komend."""
 
 POMOC = """Przykłady tego, co możesz napisać:
   co to jest fotosynteza?        → odpowiem z mojej wiedzy
-  czy sokoł jest zwierzęciem?   → wnioskowanie (fakty + reguły)
+  czy sokoł jest zwierzęciem?    → wnioskowanie (fakty + reguły)
+  co jest ssakiem?               → wymienię znane przykłady
   zapamiętaj, że Wisła to rzeka  → nauka z rozmowy
-  każdy ptak jest zwierzęciem   → reguła (sylogizm)
-  ile to 12 * (3 + 4)           → arytmetyka
-  naucz się Wawel                → czytam polską Wikipedię
+  każdy ptak jest zwierzęciem    → reguła (sylogizm)
+  ile to 12 * (3 + 4)            → arytmetyka
+  napisz funkcję silnia          → programuję w Pythonie
+  oblicz w pythonie [x*2 for x in range(5)]  → bezpiecznie wykonam kod
+  co robi ten kod: print("cześć")  → wyjaśnię linia po linii
+  co to jest zmienna             → wyjaśnię pojęcie z lekcji
+  rada: czy maszyny myślą?       → sieć agentów dyskutuje i uczy się
+  naucz się Wawel                → czytam polską Wikipedię (albo lekcje offline)
   opowiedz historię              → mój model generatywny
   jak masz na imię / mam na imię Marek
   która godzina                  → czas i data
-  samorozwój                     → cykl samodzielnego rozwoju
+  samorozwój                     → cykl samodzielnego rozwoju (też offline)
   sen                            → konsolidacja pamięci
-  statystyki                     → mój stan umysłu
+  statystyki                     → mój stan umysłu (z trybem urządzenia)
   super / nie tak                → ocena mojej odpowiedzi (uczysz mnie!)
   do widzenia                    → kończymy rozmowę"""
 

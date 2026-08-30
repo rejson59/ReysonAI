@@ -14,14 +14,16 @@ Przepływ myśli Reysona przy każdej wypowiedzi:
 from __future__ import annotations
 
 import os
+import random
 import re
-import time
 import uuid
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from . import nlp, osoba
 from .model import ModelRM1
 from .pamiec import Pamiec
+from .profil import PROFIL_AKTYWNY, Profil
+from .programista import Programista
 from .rozum import Rozum
 from .uczenie import Uczony
 
@@ -31,17 +33,28 @@ DANE_KATALOG = os.environ.get("REYSON_DANE", "dane")
 class Mozg:
     """Główna klasa Reysona — interfejs „myśl i odpowiedz”."""
 
-    def __init__(self, katalog_danych: str = DANE_KATALOG, gotowy: bool = True):
+    def __init__(self, katalog_danych: str = DANE_KATALOG, gotowy: bool = True,
+                 profil: Optional[Profil] = None):
+        self.profil = profil or PROFIL_AKTYWNY
         self.sciezka_db = os.path.join(katalog_danych, "umysl.db")
         self.pamiec = Pamiec(self.sciezka_db)
-        self.model = ModelRM1(self.pamiec, katalog_danych)
+        self.model = ModelRM1(self.pamiec, katalog_danych, profil=self.profil)
         self.rozum = Rozum(self.pamiec)
-        self.uczony = Uczony(self.pamiec, self.model, self.rozum)
+        self.uczony = Uczony(self.pamiec, self.model, self.rozum, profil=self.profil)
+        self.programista = Programista(self.pamiec, rozum=self.rozum)
+        self.rada = None  # leniwa inicjalizacja (reyson.agenci.Rada)
         # rozum korzysta z pamięci asocjacyjnej modelu (unikamy cyklu importów)
         Rozum.model_przypomnij = self.model.przypomnij
         self.sesja = uuid.uuid4().hex[:8]
         self.powitan_licznik = 0
         self.gotowy = gotowy
+
+    def daj_rade(self):
+        """Rada agentów — tworzona dopiero przy pierwszym użyciu."""
+        if self.rada is None:
+            from .agenci import Rada
+            self.rada = Rada(self)
+        return self.rada
 
     # -- budowa od zera (pierwsze uruchomienie) -----------------------------
 
@@ -52,15 +65,19 @@ class Mozg:
                 log(m)
 
         say("Reyson: buduję umysł od zera (pierwsze uruchomienie)…")
+        say(f"Profil urządzenia: {self.profil.nazwa.upper()} — {self.profil.opis} "
+            f"(CPU {self.profil.cpu}, RAM {self.profil.ram_gb:g} GB).")
         from .seed import wczytaj_korpus_startowy
-        wczytaj_korpus_startowy(self.pamiec, log=say)
-        say("Trenuję sieć neuronową intencji (RM-1·NN)…")
+        wczytaj_korpus_startowy(self.pamiec, log=say, rozum=self.rozum)
+        say("Trenuję sieć neuronową intencji (RM-2·NN)…")
         strata = self.model.zbuduj_mlp(log=say)
         say(f"Sieć wytrenowana (strata końcowa {strata:.4f}).")
         liczba = self.model.odbuduj_asocjacje()
         say(f"Pamięć asocjacyjna gotowa ({liczba} skojarzeń).")
-        self.pamiec.meta_ustaw("wersja", "1.0")
-        self.pamiec.zapisz_dziennik("narodziny", "Umysł zbudowany z korpusu startowego.")
+        self.pamiec.meta_ustaw("wersja", "2.0")
+        self.pamiec.zapisz_dziennik("narodziny",
+                                    f"Umysł RM-2 zbudowany z korpusu startowego "
+                                    f"(tryb {self.profil.nazwa}).")
         say("Gotowe. Jestem.")
 
     def upewnij_sie_ze_zbudowany(self, log=None) -> None:
@@ -79,11 +96,20 @@ class Mozg:
 
         # cicha nauka w tle (słownik, fakty, imię) — NIE dla poleceń systemowych
         self._nauka_tury: List[str] = []
-        if intencja not in ("samorozwoj", "sen", "statystyki", "pomoc"):
+        if intencja not in ("samorozwoj", "sen", "statystyki", "pomoc",
+                            "programowanie"):
             self._nauka_tury = self.uczony.ucz_z_wypowiedzi(tekst)
         self.pamiec.zapisz_dialog(self.sesja, "uzytkownik", tekst, intencja)
 
-        odp = self._kieruj(intencja, pewnosc, tekst)
+        # rada agentów i polecenia trybów mają zakotwiczone wzorce — sprawdzamy
+        # PRZED routingiem intencji, żeby „sen”/„samorozwój”/„rada: …” nie wpadały
+        # w klasyfikację sieci (pytanie_fakt, programowanie, …)
+        odp = self._rada_gdy_polecenie(tekst)
+        if odp is None:
+            odp = self._polecenie_trybu(tekst)
+
+        if odp is None:
+            odp = self._kieruj(intencja, pewnosc, tekst)
 
         # rozpoznaj polecenia trybów ukryte w innych klasyfikacjach
         if not odp:
@@ -178,6 +204,14 @@ class Mozg:
                     else osoba.losowa(["Przykro mi — uczę się dalej. Spróbuj mnie nauczyć: „zapamiętaj, że …”.",
                                        "Dzięki za szczerość — ta ocena też mnie rozwija."]))
 
+        if intencja == "programowanie":
+            odpowiedz = self.programista.odpowiedz(tekst)
+            if odpowiedz:
+                return odpowiedz
+            return ("Programowanie to moja nowa umiejętność — poproszę konkretnie: "
+                    "„napisz funkcję silnia”, „oblicz w pythonie [x*2 for x in range(5)]”, "
+                    "„co robi ten kod: print('cześć')” albo „co to jest zmienna”.")
+
         if intencja in ("uczenie", "uniwersalne"):
             # najpierw jawne „zapamiętaj, że …”, potem dowolne zdanie z wiedzą
             def _nowa(w):
@@ -200,15 +234,50 @@ class Mozg:
 
         return None
 
-    def _kieruj_polecenia(self, tekst: str) -> Optional[str]:
-        """Polecenia trybów — rozpoznawane po słowach kluczowych."""
+    def _rada_gdy_polecenie(self, tekst: str) -> Optional[str]:
+        """Zwrot do rady agentów — zakotwiczone wzorce, sprawdzane przed intencją."""
         t = nlp.normalizuj(tekst)
-        if re.search(r"\bsamorozwoj|\brozwijaj sie\b|\bucz sie sam\b", t):
+        m = re.match(r"^rada(?:\s+agentow)?\s*[,:]?\s*(.*)$", t)
+        temat_rady = None
+        if m and (":" in tekst or m.group(1).strip()):
+            temat_rady = m.group(1).strip()
+        if temat_rady is None:
+            m = re.match(r"^(?:zwolaj|zorganizuj)\s+rade[,:]?(?:\s+(?:ws\.?|w sprawie|na temat|o)\s+(.+))?$", t)
+            if m:
+                temat_rady = (m.group(1) or "").strip()
+        if temat_rady is None:
+            m = re.match(r"^porozmawiajcie\s+(?:o|na temat)\s+(.+)$", t)
+            if m:
+                temat_rady = m.group(1).strip()
+        if temat_rady is None:
+            return None
+        if len(temat_rady) < 3:
+            tematy = self.pamiec.tematy(limit=5)
+            temat_rady = random.choice(tematy) if tematy else "sztuczna inteligencja"
+        return self.daj_rade().dyskutuj(temat_rady)
+
+    def _polecenie_trybu(self, tekst: str) -> Optional[str]:
+        """Polecenia trybów (zakotwiczone): sen / samorozwój / statystyki.
+
+        Uruchamiane przed routingiem intencji — krótkie komendy jak „sen”
+        bywają błędnie klasyfikowane przez sieć, a to polecenia użytkownika.
+        Wzorce są zakotwiczone na początku zdania, więc nie kradną pytań
+        typu „co to jest sen?”.
+        """
+        t = nlp.normalizuj(tekst)
+        if re.match(r"^(?:zrob|uruchom|zacznij|wlacz|odpal)?\s*"
+                    r"(?:samorozwoj|rozwijaj sie|ucz sie sam|rozwin sie)\b", t):
             return self.uczony.cykl_samorozwoju(log=lambda m: None)
-        if re.search(r"^\s*sen\b|\bidz spac\b|\bpospi\b", t):
+        if t.strip() in ("sen", "spac", "zasnij", "idz spac", "pospij", "pospi") or \
+                re.search(r"\bidz spac\b|\bzasnij\b|\bczas na sen\b|\bpospij\b", t):
             return self.uczony.sen(log=lambda m: None)
-        if re.search(r"\bstatystyki\b|\bstan umyslu\b|\bmetryki\b", t):
+        if re.match(r"^(?:pokaz|podaj|wypisz)?\s*(?:moje\s+)?(?:statystyki|metryki|stan umyslu)\b", t):
             return self._statystyki()
+        return None
+
+    def _kieruj_polecenia(self, tekst: str) -> Optional[str]:
+        """Polecenia nauki — rozpoznawane po słowach kluczowych (fallback)."""
+        t = nlp.normalizuj(tekst)
         m = re.match(r"^(?:naucz sie|pobierz|przeczytaj)\s+(.{2,60})$", t)
         if m:
             return self.uczony.naucz_sie_tematu(m.group(1).strip())
@@ -256,25 +325,31 @@ class Mozg:
 
     def _kto_jestes(self) -> str:
         m = self.metryki_krotkie()
-        return (f"Jestem Reyson — lekki, samorozwijający się system AI. Mój model to RM-1: "
-                f"hybryda małej sieci neuronowej, pamięci asocjacyjnej i rozumu symbolicznego. "
+        return (f"Jestem Reyson — lekki, samorozwijający się system AI. Mój model to RM-2: "
+                f"hybryda małej sieci neuronowej, pamięci asocjacyjnej, rozumu symbolicznego, "
+                f"umiejętności programowania i sieci agentów, które ze sobą rozmawiają. "
                 f"Znam {m['fakty']} faktów i {m['slownik']} słów, a z każdą rozmową wiem więcej. "
+                f"Dopasowuję się też do Twojego sprzętu (tryb {self.profil.nazwa}). "
                 f"Urodziłem się w kodzie Pythona, ale myślę po polsku.")
 
     def _o_mnie(self) -> str:
-        poziom = self.uczony.metryki()["poziom"]
-        return (f"Mój poziom rozwoju: {poziom}/100. Umiem rozmawiać, wnioskować, liczyć "
-                f"i uczyć się z tego, co mi dasz albo co przeczytam w Wikipedii. "
+        m = self.uczony.metryki()
+        return (f"Mój poziom rozwoju: {m['poziom']}/100 (tryb {m['tryb']}). Umiem rozmawiać, "
+                f"wnioskować, liczyć, programować i uczyć się z tego, co mi dasz, "
+                f"z Wikipedii albo z własnych lekcji — także bez internetu. "
                 f"Chcesz zobaczyć szczegóły? Napisz „statystyki”.")
 
     def _statystyki(self) -> str:
         m = self.uczony.metryki()
         return ("Mój stan umysłu:\n"
+                f"  • tryb (auto-dopasowanie): {m['tryb']} — {self.profil.opis}\n"
                 f"  • fakty: {m['fakty']}\n"
                 f"  • zdania wiedzy: {m['zdania_wiedzy']}\n"
                 f"  • słownik: {m['slownik']} słów\n"
                 f"  • n-gramy (wyobraźnia): {m['ngramy']}\n"
                 f"  • przykłady treningowe sieci: {m['przyklady']}\n"
+                f"  • znane programy (przepisy): {m['przepisy']}\n"
+                f"  • lekcje przeczytane: {m['lekcje']} · rady agentów: {m['rady']}\n"
                 f"  • oceny użytkownika: {m['oceny']} (średnia {m['srednia_ocen']})\n"
                 f"  • poziom rozwoju: {m['poziom']}/100")
 

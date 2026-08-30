@@ -30,7 +30,7 @@ _LICZBY_SLOWNIE: Dict[str, int] = {
     "osiemnascie": 18, "dziewietnascie": 19, "dwadziescia": 20, "trzydziesci": 30,
     "czterdziesci": 40, "piecdziesiat": 50, "szescdziesiat": 60,
     "siedemdziesiat": 70, "osiemdziesiat": 80, "dziewiecdziesiat": 90,
-    "sto": 100, "dwieście": 200, "tysiac": 1000,
+    "sto": 100, "dwiescie": 200, "tysiac": 1000,
 }
 
 _DNI = ["poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela"]
@@ -55,7 +55,7 @@ class Rozum:
         kolejka: List[Tuple[str, List[str]]] = [(x, [x])]
         while kolejka:
             biezacy, sciezka = kolejka.pop(0)
-            if nlp.tez_jest_to(biezacy, y):
+            if nlp.tez_jest_to(biezacy, y) or nlp.podobne_frazy(biezacy, y):
                 return True, sciezka
             if len(sciezka) > maks_glebokosc:
                 continue
@@ -77,6 +77,55 @@ class Rozum:
         if len(sciezka) < 2:
             return ""
         return " (wnioskowałem: " + " → ".join(sciezka) + ")"
+
+    # -- instancje: „co jest ssakiem?”, „jakie znasz zwierzęta?” ---------------
+
+    def przyklady_typu(self, fraza: str, limit: int = 8) -> Optional[Tuple[str, List[str]]]:
+        """Lista znanych instancji typu („ssaki, które znam: kot, pies, …”)."""
+        t = nlp.normalizuj(fraza).strip()
+        if len(t) < 3:
+            return None
+        kandydaci = [r[0] for r in self.pamiec.db.execute(
+            "SELECT DISTINCT obiekt FROM fakty WHERE relacja IN ('jest','to')"
+        ).fetchall()]
+        # dopasowanie po stemmach (tolerancja odmiany), preferujemy krótsze nazwy klas
+        pasujace = [c for c in kandydaci
+                    if nlp.tez_jest_to(t, c) or nlp.podobne_frazy(t, c)]
+        if not pasujace:
+            return None
+        cel = nlp.normalizuj(min(pasujace, key=len))
+        podmioty = [r[0] for r in self.pamiec.db.execute(
+            "SELECT DISTINCT podmiot FROM fakty WHERE relacja IN ('jest','to') "
+            "AND obiekt=? ORDER BY id DESC LIMIT ?", (cel, limit * 2)
+        ).fetchall()]
+        # odmiana nie powinna dublować (kot/kota)
+        widziane, wynikowe = set(), []
+        for p in podmioty:
+            k = nlp.kanon(p)
+            if k in widziane:
+                continue
+            widziane.add(k)
+            wynikowe.append(p)
+            if len(wynikowe) >= limit:
+                break
+        if not wynikowe:
+            return None
+        mapa = self.pamiec.mapa_pisowni()
+        ladne = [nlp.dostosuj_pisownie(w, mapa) for w in wynikowe]
+        return nlp.dostosuj_pisownie(cel, mapa), ladne
+
+    def sprzecznosci(self, limit: int = 5) -> List[str]:
+        """Fakty „X nie jest Y” sprzeczne z regułami/faktami (wnioskowanie)."""
+        wynik: List[str] = []
+        for podmiot, obiekt in self.pamiec.db.execute(
+                "SELECT DISTINCT podmiot,obiekt FROM fakty WHERE relacja='nie_jest'"):
+            tak, sciezka = self.czy_jest(podmiot, obiekt)
+            if tak:
+                wynik.append(f"„{podmiot} nie jest {obiekt}”, ale moje reguły mówią, "
+                             f"że jest ({' → '.join(sciezka)})")
+                if len(wynik) >= limit:
+                    break
+        return wynik
 
     # -- arytmetyka -------------------------------------------------------------
 
@@ -153,8 +202,26 @@ class Rozum:
                         f'Możesz mnie nauczyć: „zapamiętaj, że {x} jest {y}”.')
             return None
 
-        # "co to jest X" / "kto to jest X" / "kto to X" / "co to X"
-        m = re.match(r"^(?:co|kto|kim|czym)\s+(?:to\s+(?:jest|są|sa)?|to\s+jest\s*|jest\s*)?(.*?)(?:\?)?$", t)
+        # „co jest ssakiem?”, „jakie znasz zwierzęta?”, „podaj przykłady ptaków”
+        m = re.match(r"^(?:co|jakie|ktore)\s+"
+                     r"(?:jest\s+|sa\s+|są\s+|znasz\s+|mozesz wymienic\s+)?"
+                     r"(?:przyklady\s+)?(.+?)(?:\s+znasz)?$", t)
+        m2 = re.match(r"^podaj\s+przyklady\s+(.+)$", t)
+        fraza = None
+        if m2:
+            fraza = m2.group(1).strip()
+        elif m and not re.match(r"^(?:to|to jest|to sa|to są|jest|byl|byla)\b",
+                                m.group(1).strip()):
+            fraza = m.group(1).strip()
+        if fraza and len(fraza) >= 3:
+            przyklady = self.przyklady_typu(fraza)
+            if przyklady and len(przyklady[1]) >= 3:
+                # listujemy instancje tylko przy pewności (≥3); przy mniej —
+                # pytanie raczej chodzi o definicję („co jest zmienna?”)
+                nazwa, lista = przyklady
+                return f"{nazwa.capitalize()}, których jestem pewien: {', '.join(lista)}."
+
+        # "co to jest X" / "kto to jest X" / "kto to X" / "co to X"        m = re.match(r"^(?:co|kto|kim|czym)\s+(?:to\s+(?:jest|są|sa)?|to\s+jest\s*|jest\s*)?(.*?)(?:\?)?$", t)
         if m and any(k in t for k in ("co to", "kto to", "kim jest", "czym jest", "co jest",
                                       "kto jest", "kto byl", "kto była", "co bylo")):
             cel = m.group(1).strip()

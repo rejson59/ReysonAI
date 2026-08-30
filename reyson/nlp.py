@@ -194,6 +194,28 @@ def tez_jest_to(a: str, b: str) -> bool:
     return wspolny >= max(4, min(len(ka), len(kb)) - 2)
 
 
+def podobne_frazy(a: str, b: str) -> bool:
+    """Czy dwie frazy (także wielowyrazowe) to ten sam pojem pojęcie po odmianie?
+
+    Porównuje słowa parami po stemmach: „jezykiem programowania” =
+    „jezyk programowania”, „ssakiem” = „ssak”. Bezpieczniejsze niż
+    znajdz_najblizsze dla krótkich pytań o typy.
+    """
+    ta, tb = tokenizuj(a), tokenizuj(b)
+    if not ta or not tb:
+        return False
+    if len(ta) != len(tb):
+        return False
+    for xa, xb in zip(ta, tb):
+        sa, sb = stem(xa), stem(xb)
+        if sa == sb:
+            continue
+        if len(sa) >= 4 and len(sb) >= 4 and (sa.startswith(sb) or sb.startswith(sa)):
+            continue
+        return False
+    return True
+
+
 def znajdz_najblizsze(fraza: str, kandydaci: Sequence[str]) -> Tuple[str | None, float]:
     """Zwraca najbliższe dopasowanie z kandydatów (lub None)."""
     fraza = normalizuj(fraza)

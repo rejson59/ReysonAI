@@ -30,7 +30,8 @@ INTENCJE = (
     "powitanie", "pozegnanie", "jak_sie_masz", "tozsamosc", "mozliwosci",
     "podziekowanie", "pytanie_fakt", "uczenie", "uniwersalne", "arytmetyka",
     "czas_data", "opowiadanie", "opinia", "pytanie_o_mnie", "pomoc",
-    "imie_uzytkownika", "sprzatanie", "ocena_dobra", "ocena_zla", "inne",
+    "imie_uzytkownika", "sprzatanie", "ocena_dobra", "ocena_zla",
+    "programowanie", "inne",
 )
 
 # hiperparametry RM-1·NN (dobrane eksperymentalnie; patrz testy/)
@@ -192,23 +193,29 @@ class PamiecAsocjacyjna:
 # ---------------------------------------------------------------------------
 
 class ModelRM1:
-    def __init__(self, pamiec: Pamiec, katalog_modelu: str = "dane"):
+    def __init__(self, pamiec: Pamiec, katalog_modelu: str = "dane", profil=None):
         self.pamiec = pamiec
         self.katalog = katalog_modelu
+        self.profil = profil  # reyson.profil.Profil (None → wartości domyślne)
+        if profil is not None:
+            pamiec.maks_n_gramu = profil.ngram_max
         self.sciezka_wag = os.path.join(katalog_modelu, "rm1_wagi.json")
         self.net: Optional[MLP] = None
         self.asocjacje = PamiecAsocjacyjna()
         self.intencja_idx = {n: i for i, n in enumerate(INTENCJE)}
 
+    def _ukryta(self) -> int:
+        return getattr(self.profil, "ukryta", 32) if self.profil else 32
+
     # -- intencje ---------------------------------------------------------------
 
-    @staticmethod
-    def _augmentuj(tokens: List[str], rng: random.Random) -> List[List[str]]:
+    def _augmentuj(self, tokens: List[str], rng: random.Random) -> List[List[str]]:
         """Powiększa mały zbiór treningowy prostymi parafrazami."""
+        n_wariantow = getattr(self.profil, "augmentacja", 3) if self.profil else 3
         prefiksy = ("hej", "słuchaj", "powiedz mi", "reyson", "proszę", "no", "to")
         sufiksy = ("proszę", "no", "mi", "bardzo", "właśnie", "hej")
         wyniki = [list(tokens)]
-        for _ in range(3):
+        for _ in range(n_wariantow):
             t = [w for w in tokens if not (len(tokens) > 3 and rng.random() < 0.15)]
             if not t:
                 t = list(tokens)
@@ -219,13 +226,30 @@ class ModelRM1:
             wyniki.append(t)
         return wyniki
 
-    def zbuduj_mlp(self, epoki: int = _EPOKI, log=None) -> float:
-        """Trenuje sieć intencji na przykładach z pamięci (z augmentacją i L2)."""
+    def zbuduj_mlp(self, epoki: Optional[int] = None, kontynuuj: bool = True,
+                   lr: Optional[float] = None, log=None) -> float:
+        """Trenuje sieć intencji na przykładach z pamięci (z augmentacją i L2).
+
+        kontynuuj=True (domyślnie) zaczyna od zapisanych wag — sen i samorozwój
+        naprawdę DOSZKALAJĄ sieć zamiast urywać ją od zera.
+        """
         przyklady = self.pamiec.przyklady_intencji()
         if not przyklady:
             return 0.0
+        if epoki is None:
+            epoki = getattr(self.profil, "epoki_budowy", _EPOKI) if self.profil else _EPOKI
         rng = random.Random(7)  # powtarzalność budowy
-        net = MLP()
+        net: Optional[MLP] = None
+        if kontynuuj and os.path.exists(self.sciezka_wag):
+            try:
+                wczytany = MLP.wczytaj(self.sciezka_wag)
+                # wagi użyteczne tylko przy zgodnych wymiarach wyjścia
+                if wczytany.wyjscia == len(INTENCJE):
+                    net = wczytany
+            except Exception:
+                net = None
+        if net is None:
+            net = MLP(ukryta=self._ukryta())
         dane: List[Tuple[List[float], int]] = []
         for t, i in przyklady:
             if i not in self.intencja_idx:
@@ -238,13 +262,14 @@ class ModelRM1:
         for epoka in range(epoki):
             rng.shuffle(dane)
             strata = 0.0
-            lr = _LR_HI if epoka < epoki * 0.7 else _LR_LO
+            lr_epoki = lr if lr is not None else (_LR_HI if epoka < epoki * 0.7 else _LR_LO)
             for x, cel in dane:
-                strata += net.ucz_probke(x, cel, lr=lr)
-                for j in range(net.ukryta):
-                    wiersz = net.W2[j]
-                    for k in range(net.wyjscia):
-                        wiersz[k] *= (1.0 - _L2)
+                strata += net.ucz_probke(x, cel, lr=lr_epoki)
+            # L2 raz na epokę (nie na próbkę — inaczej doszkalanie osłabia sieć)
+            for j in range(net.ukryta):
+                wiersz = net.W2[j]
+                for k in range(net.wyjscia):
+                    wiersz[k] *= (1.0 - _L2)
             if log and (epoka + 1) % 5 == 0:
                 log(f"  epoka {epoka + 1}/{epoki}: strata={strata / len(dane):.4f}")
         self.net = net
@@ -254,19 +279,27 @@ class ModelRM1:
     def wczytaj_mlp(self) -> bool:
         if os.path.exists(self.sciezka_wag):
             try:
-                self.net = MLP.wczytaj(self.sciezka_wag)
+                wczytany = MLP.wczytaj(self.sciezka_wag)
+                if wczytany.wyjscia != len(INTENCJE):
+                    return False  # wagi ze starej wersji intencji → trzeba przebudować
+                self.net = wczytany
                 return True
             except Exception:
                 pass
         return False
 
     def rozpoznaj_intencje(self, tekst: str) -> Tuple[str, float]:
-        """Intencja: najpierw kuratorowana lista fraz (pewniaki), potem sieć RM-1·NN."""
+        """Intencja: najpierw kuratorowana lista fraz (pewniaki), potem sieć RM-2·NN."""
         klawisz = self.intencja_z_klawiszy(tekst)
         if klawisz != "inne":
             return klawisz, 0.95
         if self.net is None and not self.wczytaj_mlp():
-            return "inne", 0.5
+            # brak wag albo wagi ze starej wersji intencji → przebuduj i lecz się
+            if self.pamiec.liczba_przykladow() > 0:
+                self.zbuduj_mlp(epoki=min(12, getattr(self.profil, "epoki_budowy", 20)
+                                          if self.profil else 20))
+            if self.net is None:
+                return "inne", 0.5
         x = nlp.hasz_wektor(nlp.tokenizuj(tekst), self.net.wejscia)
         x = [v * _SKALA_CECH for v in x]
         _, p = self.net.przewiduj(x)
@@ -294,15 +327,22 @@ class ModelRM1:
         "tozsamosc": ("kim jestes", "kto ty jestes", "jak sie nazywasz", "coto za program",
                       "co to za program", "co ty jestes", "przedstaw sie"),
         "mozliwosci": ("co umiesz", "co potrafisz", "jakie masz mozliwosci", "co wiesz zrobic",
-                       "do czego sluzysz", "pomocy", "co mozesz"),
+                       "do czego sluzysz", "co mozesz"),
         "jak_sie_masz": ("jak sie masz", "co u ciebie", "jak leci", "co robisz", "jak tam"),
         "czas_data": ("ktora godzina", "jaki dzien", "jaka data", "dzisiejsza data", "ktory dzis"),
+        "pytanie_fakt": ("jakie znasz", "podaj przyklady", "co jest", "jakie sa", "wymien", "co wiesz o"),
         "opowiadanie": ("opowiedz", "opowiadaj", "wymysl historie", "bajke", "opowiedz cos"),
-        "pomoc": ("pomoc", "help", "co mam robic", "instrukcja", "komendy"),
+        "pomoc": ("pomoc", "help", "co mam robic", "komendy"),
         "ocena_dobra": ("dobra odpowiedz", "swietnie", "super", "brawo", "madry jestes",
                         "dobrze", "ladnie", "ekstra"),
         "ocena_zla": ("zla odpowiedz", "blednie", "nie rozumiesz", "glupio", "nie tak",
                       "nieprawda", "bledna odpowiedz", "nie o to chodzi"),
+        "programowanie": ("napisz kod", "napisz program", "napisz funkcje", "napisz skrypt",
+                          "pokaz kod", "pokaz program", "przyklad kodu", "jak zaprogramowac",
+                          "jak napisac program", "co robi ten kod", "wyjasnij kod",
+                          "oblicz w pythonie", "policz w pythonie", "wykonaj w pythonie",
+                          "python:", "w pythonie", "silnia", "fibonacci", "fizzbuzz",
+                          "palindrom", "sortowanie", "tabliczka mnozenia"),
     }
 
     def intencja_z_klawiszy(self, tekst: str) -> str:
@@ -317,8 +357,14 @@ class ModelRM1:
 
     def doskalaj_intencje(self, tekst: str, intencja: str) -> bool:
         """Uczy się nowej korekty od użytkownika (samodoskonalenie)."""
-        if self.net is None or intencja not in self.intencja_idx:
+        if intencja not in self.intencja_idx:
             return False
+        if self.net is None:
+            self.wczytaj_mlp()
+        if self.net is None or self.net.wyjscia != len(INTENCJE):
+            self.zbuduj_mlp()  # przebuduj sieć o zgodnych wymiarach wyjścia
+            if self.net is None:
+                return False
         x = nlp.hasz_wektor(nlp.tokenizuj(tekst), self.net.wejscia)
         x = [v * _SKALA_CECH for v in x]
         self.net.doskalaj(x, self.intencja_idx[intencja])
@@ -344,11 +390,12 @@ class ModelRM1:
     # -- generowanie (n-gramy) ---------------------------------------------------------
 
     def generuj(self, seed: Sequence[str], maks_slow: int = 22) -> str:
-        """Tworzy zdanie startując od nasionka (trigram z backoffem).
+        """Tworzy zdanie startując od nasionka (n-gram z backoffem do bigramu).
 
         Nasionko jest ważne tylko wtedy, gdy model zna jego konteksty —
         w przeciwnym razie zaczynamy od losowego znaku zdania z korpusu.
         """
+        maks_n = getattr(self.pamiec, "maks_n_gramu", 3) or 3
         tokeny: List[str] = []
         for t in (s for s in seed if s):
             istnieje = self.pamiec.db.execute(
@@ -359,16 +406,17 @@ class ModelRM1:
                 break
         if not tokeny:
             # start „z pustego zdania”: rozkład pierwszych słów zdań z całej wiedzy
+            start_kontekst = " ".join(["<s>"] * (maks_n - 1))
             row = self.pamiec.db.execute(
-                "SELECT slowo, licznik FROM ngramy WHERE n=3 AND kontekst='<s> <s>' "
-                "ORDER BY licznik DESC LIMIT 12"
+                "SELECT slowo, licznik FROM ngramy WHERE n=? AND kontekst=? "
+                "ORDER BY licznik DESC LIMIT 12", (maks_n, start_kontekst)
             ).fetchall()
             if not row:
                 return ""
             tokeny = [random.choices([r[0] for r in row],
                                      weights=[r[1] for r in row])[0]]
         for _ in range(maks_slow):
-            kandydaci = self.pamiec.nastepne_slowa(tokeny, n=3 if len(tokeny) >= 2 else 2)
+            kandydaci = self.pamiec.nastepne_slowa(tokeny, n=maks_n)
             if not kandydaci:
                 # kontynuacja awaryjna: losowe częste słowo (bez interpunkcji/startów)
                 awaryjne = self.pamiec.db.execute(

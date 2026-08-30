@@ -1,0 +1,3 @@
+# Pętle i warunki
+
+Pętla to instrukcja powtarzająca fragment kodu. Pętla for przechodzi po elementach sekwencji. Pętla while powtarza kod dopóki warunek jest prawdziwy. Warunek to wyrażenie prawdziwe albo fałszywe. Instrukcja if wykonuje kod gdy warunek jest prawdziwy. Instrukcja else wykonuje kod gdy warunek jest fałszywy. Instrukcja elif dodaje kolejny warunek. Zagnieżdżenie to umieszczenie bloku wewnątrz innego bloku. Instrukcja break przerywa pętlę. Instrukcja continue przechodzi do kolejnego obrotu pętli. Funkcja range generuje ciąg liczb. Licznik pętli to zmienna sterująca powtórzeniami. Iteracja to jeden obrót pętli. Zbieranie wyników w liście to typowy wzorzec w pętlach. Nieskończona pętla to błąd brakującego warunku końca.
