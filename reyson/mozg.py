@@ -64,12 +64,12 @@ class Mozg:
             if log:
                 log(m)
 
-        say("Reyson: buduję umysł od zera (pierwsze uruchomienie)…")
+        say("Reyson: buduję umysł od zera (pierwsze uruchomienie)...")
         say(f"Profil urządzenia: {self.profil.nazwa.upper()} — {self.profil.opis} "
             f"(CPU {self.profil.cpu}, RAM {self.profil.ram_gb:g} GB).")
         from .seed import wczytaj_korpus_startowy
         wczytaj_korpus_startowy(self.pamiec, log=say, rozum=self.rozum)
-        say("Trenuję sieć neuronową intencji (RM-2·NN)…")
+        say("Trenuję sieć neuronową intencji (RM-2·NN)...")
         strata = self.model.zbuduj_mlp(log=say)
         say(f"Sieć wytrenowana (strata końcowa {strata:.4f}).")
         liczba = self.model.odbuduj_asocjacje()
@@ -102,8 +102,8 @@ class Mozg:
         self.pamiec.zapisz_dialog(self.sesja, "uzytkownik", tekst, intencja)
 
         # rada agentów i polecenia trybów mają zakotwiczone wzorce — sprawdzamy
-        # PRZED routingiem intencji, żeby „sen”/„samorozwój”/„rada: …” nie wpadały
-        # w klasyfikację sieci (pytanie_fakt, programowanie, …)
+        # PRZED routingiem intencji, żeby „sen”/„samorozwój”/„rada: ...” nie wpadały
+        # w klasyfikację sieci (pytanie_fakt, programowanie, ...)
         odp = self._rada_gdy_polecenie(tekst)
         if odp is None:
             odp = self._polecenie_trybu(tekst)
@@ -121,7 +121,7 @@ class Mozg:
 
         if not odp and intencja in ("uczenie", "uniwersalne"):
             odp = ("Zapisałem, co dało się zapisać. Chcesz mi przekazać coś konkretnego? "
-                   "Napisz: „zapamiętaj, że …”.")
+                   "Napisz: „zapamiętaj, że ...”.")
 
         if not odp:
             odp = self._nie_znam_odpowiedzi(tekst)
@@ -201,7 +201,7 @@ class Mozg:
             self.pamiec.dodaj_ocene(1 if dobra else -1, tekst)
             return (osoba.losowa(["Dziękuję! Tak właśnie rosnę.",
                                   "Cieszę się! Zapisuję tę ocenę w pamięci."]) if dobra
-                    else osoba.losowa(["Przykro mi — uczę się dalej. Spróbuj mnie nauczyć: „zapamiętaj, że …”.",
+                    else osoba.losowa(["Przykro mi — uczę się dalej. Spróbuj mnie nauczyć: „zapamiętaj, że ...”.",
                                        "Dzięki za szczerość — ta ocena też mnie rozwija."]))
 
         if intencja == "programowanie":
@@ -213,7 +213,7 @@ class Mozg:
                     "„co robi ten kod: print('cześć')” albo „co to jest zmienna”.")
 
         if intencja in ("uczenie", "uniwersalne"):
-            # najpierw jawne „zapamiętaj, że …”, potem dowolne zdanie z wiedzą
+            # najpierw jawne „zapamiętaj, że ...”, potem dowolne zdanie z wiedzą
             def _nowa(w):
                 return bool(w) and "już znam" not in w and not w.startswith("To już")
             for wzor in Rozum.WZORY_UCZENIA:
